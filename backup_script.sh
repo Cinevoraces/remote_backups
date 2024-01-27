@@ -10,7 +10,8 @@ max_items=100
 
 # Get the list of remote backups from the SSH output
 echo "Recovering distant backups list..."
-distant_backups_list=$(ssh $service_name ls -1t $distant_directory)
+# distant_backups_list=$(ssh $service_name ls -1t $distant_directory)
+remote_backups_info=$(ssh $service_name "cd $distant_directory && ls -1t")
 
 # Get the most recent file in the local directory, if it's not empty
 most_recent_local=""
@@ -20,9 +21,9 @@ fi
 
 # Copy most recent remote_backups that are not stored locally
 echo "Copying lastest backups locally..."
-for remote_backup in $distant_backups_list; do
+for remote_backup in "${!remote_backup_timestamps[@]}"; do
   local_backup="$local_directory/$(basename $remote_backup)"
-  if [[ $most_recent_local == "" || "$remote_backup" -nt $most_recent_local ]]; then
+  if [[ -z "$most_recent_local" || "$remote_backup" > "$most_recent_local" ]]; then
     scp $service_name:$distant_directory/$remote_backup $local_backup
     echo "$remote_backup saved locally."
   else
