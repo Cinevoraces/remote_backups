@@ -16,7 +16,8 @@ IFS=$'\n' read -rd '' -a remote_backups <<<"$remote_backups_info"
 # Get the most recent file in the local directory, if it's not empty
 most_recent_local=""
 if [ -n "$(ls -A $local_directory)" ]; then
-  most_recent_local=$(ls -1t "$local_directory" | head -n 1)
+  most_recent_local=$(ls $local_directory | grep -oP 'backup_\K[\d-]+\.[\d:]+' | sort -t '_' -k 1,1 | tail -n 1)
+  most_recent_local="backup_${most_recent_local}.tar"
 fi
 
 # Copy most recent remote_backups that are not stored locally
